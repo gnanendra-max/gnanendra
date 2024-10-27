@@ -12,7 +12,7 @@
         <div class="form-container">
             <form id="riskForm">
                 <table>
-                    <tr>
+                    <tr id="pregnancyRow">
                         <td><label for="pregnancies">Number of Pregnancies:</label></td>
                         <td><input type="number" id="pregnancies" name="pregnancies" required></td>
                     </tr>
@@ -64,7 +64,19 @@
             </form>
         </div>
         <div id="result" class="result"></div>
+        <div id="foodSuggestions" class="food-suggestions"></div>
     </div>
     <script src="script.js"></script>
+    <script>
+        document.getElementById('gender').addEventListener('change', function() {
+            const pregnanciesRow = document.getElementById('pregnancyRow');
+            if (this.value === 'male') {
+                pregnanciesRow.style.display = 'none'; // Hide if male
+                document.getElementById('pregnancies').value = ''; // Clear the input
+            } else {
+                pregnanciesRow.style.display = ''; // Show if female or other
+            }
+        });
+    </script>
 </body>
 </html>
