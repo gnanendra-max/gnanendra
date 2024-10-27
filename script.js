@@ -1,6 +1,6 @@
 function calculateRisk() {
     // Get input values
-    const pregnancies = parseInt(document.getElementById('pregnancies').value);
+    const pregnancies = parseInt(document.getElementById('pregnancies').value) || 0; // Default to 0 if NaN
     const glucose = parseInt(document.getElementById('glucose').value);
     const bloodPressure = parseInt(document.getElementById('bloodPressure').value);
     const skinThickness = parseInt(document.getElementById('skinThickness').value);
@@ -11,9 +11,9 @@ function calculateRisk() {
     const gender = document.getElementById('gender').value;
 
     // Basic validation
-    if (isNaN(pregnancies) || isNaN(glucose) || isNaN(bloodPressure) ||
-        isNaN(skinThickness) || isNaN(bmi) || isNaN(insulin) ||
-        isNaN(diabetesPedigree) || isNaN(age) || !gender) {
+    if (isNaN(glucose) || isNaN(bloodPressure) || isNaN(skinThickness) ||
+        isNaN(bmi) || isNaN(insulin) || isNaN(diabetesPedigree) ||
+        isNaN(age) || !gender) {
         alert("Please enter valid numbers for all fields and select your gender.");
         return;
     }
@@ -61,18 +61,97 @@ function calculateRisk() {
     riskScore += insulin * 0.01;
     riskScore += diabetesPedigree * 0.2;
     riskScore += (age - 25) * 0.05;
-    // Gender impact (example, adjust weights based on actual data)
+
+    // Gender impact
     if (gender === "female") {
         riskScore += 1.0; // Assuming females have a different baseline risk
     }
 
-    if (riskScore > 10) {
+    // Determine risk level based on score
+    if (riskScore > 15) {
+        risk = "Very High";
+    } else if (riskScore > 10) {
         risk = "High";
     } else if (riskScore > 5) {
         risk = "Medium";
+    } else if (riskScore > 2) {
+        risk = "Low";
+    } else {
+        risk = "Very Low";
     }
 
     // Display result with color coding for better UX
     const resultDiv = document.getElementById('result');
-    resultDiv.innerHTML = `<h2>Your estimated diabetes risk is: <strong style="color: ${risk === 'High' ? 'red' : (risk === 'Medium' ? 'orange' : 'green')}">${risk}</strong></h2>`;
+    resultDiv.innerHTML = `<h2>Your estimated diabetes risk is: <strong style="color: ${risk === 'Very High' ? 'darkred' : (risk === 'High' ? 'red' : (risk === 'Medium' ? 'orange' : (risk === 'Low' ? 'green' : 'lightgreen')))}">${risk}</strong></h2>`;
+    
+    // Suggest food based on risk level
+    displayFoodSuggestions(risk);
 }
+
+function displayFoodSuggestions(risk) {
+    const foodSuggestionsDiv = document.getElementById('foodSuggestions');
+    let suggestions;
+
+    switch (risk) {
+        case "Very High":
+            suggestions = [
+                "Leafy greens (50 calories per serving)",
+                "Avocado (160 calories per serving)",
+                "Berries (70 calories per serving)",
+                "Nuts (200 calories per serving)",
+                "Salmon (200 calories per serving)"
+            ];
+            break;
+        case "High":
+            suggestions = [
+                "Whole grains (150 calories per serving)",
+                "Broccoli (55 calories per serving)",
+                "Quinoa (220 calories per serving)",
+                "Greek yogurt (100 calories per serving)",
+                "Eggs (70 calories per serving)"
+            ];
+            break;
+        case "Medium":
+            suggestions = [
+                "Fruits (100 calories per serving)",
+                "Lean meat (150 calories per serving)",
+                "Sweet potatoes (100 calories per serving)",
+                "Oatmeal (150 calories per serving)",
+                "Hummus (100 calories per serving)"
+            ];
+            break;
+        case "Low":
+            suggestions = [
+                "Vegetables (50 calories per serving)",
+                "Chicken breast (165 calories per serving)",
+                "Tofu (70 calories per serving)",
+                "Brown rice (215 calories per serving)",
+                "Fish (200 calories per serving)"
+            ];
+            break;
+        case "Very Low":
+            suggestions = [
+                "Apples (95 calories per serving)",
+                "Carrots (50 calories per serving)",
+                "Popcorn (30 calories per serving)",
+                "Cottage cheese (80 calories per serving)",
+                "Zucchini (20 calories per serving)"
+            ];
+            break;
+        default:
+            suggestions = [];
+    }
+
+    foodSuggestionsDiv.innerHTML = `<h3>Food Suggestions:</h3><ul>${suggestions.map(food => `<li>${food}</li>`).join('')}</ul>`;
+}
+
+// Event listener to manage the visibility of pregnancies input based on gender
+document.getElementById('gender').addEventListener('change', function() {
+    const pregnanciesRow = document.getElementById('pregnancyRow');
+    if (this.value === 'male') {
+        pregnanciesRow.style.display = 'none'; // Hide if male
+        document.getElementById('pregnancies').value = ''; // Clear the input
+    } else {
+        pregnanciesRow.style.display = ''; // Show if female or other
+    }
+});
